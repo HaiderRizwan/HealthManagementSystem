@@ -16,8 +16,19 @@ const openai = new OpenAI({
 
 const app = express();
 
-// Enable CORS before other middleware
-app.use(cors());
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: [
+    'https://health-management-system-client.vercel.app',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+};
+
+// Enable CORS with options before other middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -880,7 +891,7 @@ app.post('/api/:userId/post_Bloodtype', async (req, res) => {
   }
 });
 
-//Basic Info http://localhost:5000/api/${userId}/check_basic_info
+//Basic Info API endpoint
 app.get('/api/:userId/check_basic_info', async (req, res) => {
   try {
     const basicInfo = await BasicInfo.findOne({ userId: req.params.userId });
@@ -1135,6 +1146,11 @@ app.put('/api/users/:userId', async (req, res) => {
     console.error('Error updating user profile:', error);
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// Add a health check endpoint at the beginning of your routes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
 app.listen(PORT, () => {
