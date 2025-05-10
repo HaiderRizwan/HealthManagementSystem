@@ -38,6 +38,7 @@ import {
 import AdminSidebar from './AdminSidebar';
 import EmailDashboard from './EmailDashboard';
 import axios from 'axios';
+import { buildApiUrl } from '../../../config/api';
 
 function AdminMain() {
   const [stats, setStats] = useState({
@@ -73,7 +74,7 @@ function AdminMain() {
         setLoading(true);
         
         // Fetch all dashboard statistics in one call
-        const response = await axios.get('http://localhost:5000/dashboard/stats');
+        const response = await axios.get(buildApiUrl('/dashboard/stats'));
         const stats = response.data;
 
         setStats({

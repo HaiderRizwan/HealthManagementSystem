@@ -5,6 +5,7 @@ import { Typography, TextField, Button, Container, Paper, List, ListItem, ListIt
 import { makeStyles } from '@mui/styles';
 import { Search as SearchIcon, AddCircleOutline as AddCircleOutlineIcon, Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '../../../config/api';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -49,7 +50,7 @@ const MedicalRecords = ({ userId }) => {
   
   const fetchMedicalRecords = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/medical-records/${userId}`);
+      const response = await axios.get(buildApiUrl(`/api/medical-records/${userId}`));
       setMedicalRecords(response.data);
       console.log('Medical records fetched successfully.', response.data);
     } catch (error) {
@@ -102,9 +103,12 @@ const MedicalRecords = ({ userId }) => {
   
     try {
       // Save new record to database
-      await axios.post('http://localhost:5000/api/medical-records', {
-        ...newRecord,
-        userId
+      await axios.post(buildApiUrl('/api/medical-records'), {
+        userId,
+        date: new Date().toISOString().split('T')[0],
+        doctorName: newRecord.doctorName,
+        diagnosis: newRecord.diagnosis,
+        prescription: newRecord.prescription
       });
   
       console.log('New record added successfully', newRecord);

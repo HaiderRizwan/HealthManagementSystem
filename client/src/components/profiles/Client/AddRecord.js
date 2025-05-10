@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Grid, Paper, Typography, TextField, Button } from '@mui/material';
+import { buildApiUrl } from '../../../config/api';
 
 const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/users/${userId}`);
+        const response = await axios.get(buildApiUrl(`/api/users/${userId}`));
         setUserData(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -41,9 +42,10 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
     });
   };
 
-  const handleAddRecord = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/medical-records', {
+      await axios.post(buildApiUrl('/api/medical-records'), {
         ...newRecord,
         userId
       });
@@ -55,8 +57,6 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
       console.error('Error adding new record:', error);
     }
   };
-
-
 
   return (
     <Grid container justifyContent="center" spacing={2}>
@@ -72,7 +72,7 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
             </div>
           )}
 
-          <form>
+          <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
               type="date"
@@ -113,7 +113,7 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
               required
               sx={{ marginBottom: 2 }}
             />
-            <Button variant="contained" onClick={() => handleAddSubmitRecord(newRecord,userId)} sx={{ marginRight: 2 }}>
+            <Button variant="contained" type="submit" sx={{ marginRight: 2 }}>
               Save
             </Button>
             <Button variant="outlined" onClick={handleBack}>

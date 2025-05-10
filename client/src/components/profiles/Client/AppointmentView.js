@@ -21,6 +21,7 @@ import {
   LocationOn as LocationIcon,
   Notes as NotesIcon
 } from '@mui/icons-material';
+import { buildApiUrl } from '../../../config/api';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -110,7 +111,7 @@ const AppointmentView = ({ userId }) => {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/appointments/user/${userId}`);
+      const response = await axios.get(buildApiUrl(`/api/appointments/user/${userId}`));
       setAppointments(response.data);
       setFilteredAppointments(response.data);
     } catch (error) {

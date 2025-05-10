@@ -18,6 +18,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HomeIcon from '@mui/icons-material/Home';
 import AdminSidebar from './AdminSidebar';
+import { buildApiUrl } from '../../../config/api';
 
 function DoctorCard({ doctor }) {
   return (
@@ -96,7 +97,7 @@ function ViewDoctor() {
   const fetchDoctorData = async () => {
     try {
       setLoading(true);
-      const userRes = await fetch("http://localhost:5000/fetch_user?role=Doctor");
+      const userRes = await fetch(buildApiUrl("/fetch_user?role=Doctor"));
       
       if (!userRes.ok) throw new Error('Failed to fetch doctors');
       
@@ -104,7 +105,7 @@ function ViewDoctor() {
       
       const doctorData = await Promise.all(
         userData.map(async (user) => {
-          const res = await fetch(`http://localhost:5000/fetch_doctor/${user._id}`);
+          const res = await fetch(buildApiUrl(`/fetch_doctor/${user._id}`));
           if (!res.ok) return {};
           return await res.json();
         })

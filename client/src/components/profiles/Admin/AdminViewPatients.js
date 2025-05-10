@@ -26,6 +26,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AdminSidebar from './AdminSidebar';
+import { buildApiUrl } from '../../../config/api';
 
 function PatientCard({ patient }) {
 
@@ -255,7 +256,7 @@ function ViewPatients() {
       setLoading(true);
       setError(null);
       
-      const userRes = await fetch("http://localhost:5000/fetch_user?role=Patient");
+      const userRes = await fetch(buildApiUrl("/fetch_user?role=Patient"));
       
       if (!userRes.ok) {
         throw new Error(`Failed to fetch patients: ${userRes.status} ${userRes.statusText}`);
@@ -268,7 +269,7 @@ function ViewPatients() {
       const patientData = await Promise.all(
         userData.map(async (user) => {
           try {
-            const res = await fetch(`http://localhost:5000/fetch_patient/${user._id}`);
+            const res = await fetch(buildApiUrl(`/fetch_patient/${user._id}`));
             if (!res.ok) return {};
             const patientDetails = await res.json();
             console.log(`Patient details for ${user._id}:`, patientDetails);

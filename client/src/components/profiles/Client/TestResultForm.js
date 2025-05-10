@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Box } from '@mui/material';
+import { buildApiUrl } from '../../../config/api';
 
 const TestForm = ({ userId, fetchTestResults, setShowNewComponent }) => {
   const [upperBP, setUpperBP] = useState('');
@@ -13,7 +14,7 @@ const TestForm = ({ userId, fetchTestResults, setShowNewComponent }) => {
     const formData = { upperBP, lowerBP, heartRate, date };
     try {
       console.log(formData);
-      const response = await axios.post(`http://localhost:5000/api/${userId}/post_test_result`, formData);
+      const response = await axios.post(buildApiUrl(`/api/${userId}/post_test_result`), formData);
       console.log('Test result saved:', response.data);
       // Optionally, you can handle success response here
       setShowNewComponent(false);

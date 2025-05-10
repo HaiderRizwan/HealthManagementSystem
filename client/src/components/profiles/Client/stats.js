@@ -24,6 +24,7 @@ import AirIcon from '@mui/icons-material/Air';
 import HeightIcon from '@mui/icons-material/Height';
 import MonitorWeightIcon from '@mui/icons-material/MonitorWeight';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import { buildApiUrl } from '../../../config/api';
 
 const Stats = ({ userId }) => {
   const [bloodtype, setBloodType] = useState('');
@@ -72,7 +73,7 @@ const Stats = ({ userId }) => {
   const fetchBasicInfo = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/${userId}/check_basic_info`);
+      const response = await axios.get(buildApiUrl(`/api/${userId}/check_basic_info`));
       const basicInfoData = response.data;
       console.log('Basic Info Data:', basicInfoData);
       // Assuming basic info is an object
@@ -97,7 +98,7 @@ const Stats = ({ userId }) => {
   const fetchBloodType = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/${userId}/check_Bloodtype`);
+      const response = await axios.get(buildApiUrl(`/api/${userId}/check_Bloodtype`));
       const bloodTypeData = response.data;
       console.log('Blood Type Data:', bloodTypeData);
       if (bloodTypeData.length > 0) {
@@ -123,7 +124,7 @@ const Stats = ({ userId }) => {
     setBloodType(selectedBloodType);
     console.log('Selected blood type:', userId, selectedBloodType);
     try {
-      const response = await axios.post(`http://localhost:5000/api/${userId}/post_Bloodtype`, {
+      const response = await axios.post(buildApiUrl(`/api/${userId}/post_Bloodtype`), {
         userId: userId,
         bloodType: selectedBloodType
       });
@@ -138,7 +139,7 @@ const Stats = ({ userId }) => {
 
   const handleBasicInfoUpdates = async () => {
     try {
-      const response = await axios.post(`http://localhost:5000/api/${userId}/post_basic_info`, {
+      const response = await axios.post(buildApiUrl(`/api/${userId}/post_basic_info`), {
         userId: userId,
         age: age,
         height: height,

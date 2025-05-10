@@ -11,6 +11,7 @@ import {
   CheckCircle, Cancel, HourglassFull, ConfirmationNumber,
   Phone, Email
 } from '@mui/icons-material';
+import { buildApiUrl } from '../../config/api';
 
 const AppointmentList = ({ doctorId }) => {
   const [appointments, setAppointments] = useState([]);
@@ -21,7 +22,7 @@ const AppointmentList = ({ doctorId }) => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/appointments/doctor/${doctorId}`);
+        const response = await axios.get(buildApiUrl(`/appointments/doctor/${doctorId}`));
         setAppointments(response.data);
         setLoading(false);
       } catch (error) {

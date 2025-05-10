@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Typography, Container, Button, Grid, Paper } from '@mui/material'; // Import Material UI components
 import { AddCircleOutline as AddCircleOutlineIcon } from '@mui/icons-material'; // Import AddCircleOutline icon from Material UI icons
 import TestForm from './TestResultForm';
+import { buildApiUrl } from '../../../config/api';
 
 const TestResult = ({ userId }) => {
   const [showNewComponent, setShowNewComponent] = useState(false);
@@ -20,7 +21,7 @@ const TestResult = ({ userId }) => {
 
   const fetchTestResults = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/${userId}/check_test_results`);
+      const response = await axios.get(buildApiUrl(`/api/${userId}/check_test_results`));
       console.log("Test results GET:", response.data);
       setTestResults(response.data);
       setShowUpdated(true);

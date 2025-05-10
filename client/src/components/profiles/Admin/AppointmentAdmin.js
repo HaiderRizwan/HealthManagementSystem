@@ -13,6 +13,7 @@ import {
   Chip
 } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { buildApiUrl } from '../../../config/api';
 
 function Appointment() {
   const { id } = useParams(); // More reliable way to get ID from URL
@@ -36,7 +37,7 @@ function Appointment() {
     const fetchDoctorData = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:5000/doctors/${id}`);
+        const res = await fetch(buildApiUrl(`/doctors/${id}`));
         
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);

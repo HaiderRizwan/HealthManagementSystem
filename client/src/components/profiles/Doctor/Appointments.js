@@ -41,6 +41,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import { styled } from '@mui/material/styles';
+import { buildApiUrl } from '../../../config/api';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -86,7 +87,7 @@ const AppointmentDoctor = ({ userId }) => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/appointments/doctor/${userId}`);
+      const response = await axios.get(buildApiUrl(`/appointments/doctor/${userId}`));
       console.log('Appointments:', response.data);
       setAppointments(response.data);
       setLoading(false);
@@ -98,7 +99,7 @@ const AppointmentDoctor = ({ userId }) => {
 
   const handleBookAppointment = async (appointmentId, status) => {
     try {
-      const response = await axios.put(`http://localhost:5000/appointments/${appointmentId}/status`, {
+      const response = await axios.put(buildApiUrl(`/appointments/${appointmentId}/status`), {
         status
       });
       if (response.data) {

@@ -4,6 +4,7 @@ import { Typography, CircularProgress, TextField, Button, Container, Grid, Paper
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { buildApiUrl } from '../../../config/api';
 
 const localizer = momentLocalizer(moment);
 
@@ -21,7 +22,7 @@ const ManageSchedule = ({ userId }) => {
 
   const fetchSchedule = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/schedule/${userId}`);
+      const response = await axios.get(buildApiUrl(`/api/schedule/${userId}`));
       setSchedule(response.data);
       setLoading(false);
     } catch (error) {
@@ -30,10 +31,19 @@ const ManageSchedule = ({ userId }) => {
     }
   };
 
+  const fetchScheduleData = async () => {
+    try {
+      const response = await axios.get(buildApiUrl(`/api/schedule/${userId}`));
+      setSchedule(response.data);
+    } catch (error) {
+      console.error('Error fetching schedule:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get(`http://localhost:5000/api/schedule/${userId}`);
+      const response = await axios.get(buildApiUrl(`/api/schedule/${userId}`));
       setSchedule(response.data);
 
       if (!endTime) {
@@ -57,7 +67,7 @@ const ManageSchedule = ({ userId }) => {
         return;
       }
 
-      await axios.post('http://localhost:5000/api/schedule', {
+      await axios.post(buildApiUrl('/api/schedule'), {
         user_id: userId,
         date,
         shift_id: shiftId,

@@ -16,6 +16,7 @@ import {
   DialogActions
 } from '@mui/material';
 import axios from 'axios';
+import { buildApiUrl } from '../../../config/api';
 
 const EmailDashboard = () => {
   const [emails, setEmails] = useState([]);
@@ -34,7 +35,7 @@ const EmailDashboard = () => {
 
   const fetchEmails = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/emails');
+      const response = await axios.get(buildApiUrl('/api/emails'));
       setEmails(response.data);
       setLoading(false);
     } catch (err) {
@@ -45,7 +46,7 @@ const EmailDashboard = () => {
 
   const handleSendEmail = async () => {
     try {
-      await axios.post('http://localhost:5000/api/send-email', newEmail);
+      await axios.post(buildApiUrl('/api/send-email'), newEmail);
       setOpenCompose(false);
       setNewEmail({ to: '', subject: '', message: '' });
       fetchEmails(); // Refresh the email list
