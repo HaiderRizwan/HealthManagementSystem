@@ -1,0 +1,88 @@
+/* ManageSchedule.css */
+
+#manage-schedule-container {
+    margin-top: 20px;
+}
+
+#manage-schedule-title {
+    font-size: 24px;
+}
+
+#manage-schedule-row {
+    display: flex;
+}
+
+#manage-schedule-col-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+}
+
+#manage-schedule-col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+#manage-schedule-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+}
+
+#manage-schedule-card-body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+#manage-schedule-form-label {
+    margin-bottom: .5rem;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+#manage-schedule-form-control {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+#manage-schedule-form-select {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+#manage-schedule-btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    cursor: pointer;
+}
+
+#manage-schedule-btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}

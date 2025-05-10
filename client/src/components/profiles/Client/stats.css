@@ -1,0 +1,233 @@
+.holder {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 2rem;
+}
+
+.circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem auto;
+  font-size: 2.5rem;
+  font-weight: bold;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.blood {
+  background: linear-gradient(135deg, #f44336 0%, #b71c1c 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.blood::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.7;
+  }
+}
+
+.inner-p {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.rectangle1, .rectangle2 {
+  width: 300px;
+  height: 200px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.rectangle1:hover, .rectangle2:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.rectangle1 {
+  background: linear-gradient(to bottom right, #e3f2fd, #bbdefb);
+  color: #0d47a1;
+  position: relative;
+  overflow: hidden;
+}
+
+.rectangle2 {
+  background: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
+  color: #2e7d32;
+}
+
+.green {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+  color: white !important;
+}
+
+.orange {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  color: white !important;
+}
+
+.red {
+  background: linear-gradient(135deg, #f44336 0%, #c62828 100%) !important;
+  color: white !important;
+}
+
+.inner-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: breathe 4s infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes breathe {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+.health {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+#basic {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#basicform {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#basicform input {
+  padding: 0.75rem;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+#basicform input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+#basic-info {
+  width: 100%;
+  text-align: left;
+}
+
+#basic-info p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+#basic-info p strong {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+#basic-info p em {
+  font-style: normal;
+  font-weight: 500;
+}
+
+.animation-enabled {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .holder {
+    flex-direction: column;
+  }
+  
+  .rectangle1, .rectangle2 {
+    width: 90%;
+    margin: 1rem auto;
+  }
+  
+  .circle {
+    width: 120px;
+    height: 120px;
+    font-size: 2rem;
+  }
+  
+  .inner-p {
+    font-size: 2.5rem;
+  }
+}

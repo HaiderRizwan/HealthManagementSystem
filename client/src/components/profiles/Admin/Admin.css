@@ -1,0 +1,29 @@
+/* adminProfile.css */
+
+.card {
+    margin-top: 20px;
+    border: 1px solid #2d90d2;
+    ;
+    border-radius: 8px;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.profile-heading {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.profile-details {
+    margin-top: 10px;
+}
+
+.profile-details p {
+    margin-bottom: 10px;
+}
+
+.profile-details p:last-child {
+    margin-bottom: 0;
+}
