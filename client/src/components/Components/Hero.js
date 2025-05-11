@@ -1,37 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Doctor from "../Assets/doctor-picture.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarCheck, faAngleUp } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate  } from "react-router-dom";
+import React from "react";
 import "../Styles/Hero.css";
 
 function Hero() {
-  const navigate = useNavigate();
-  const [goUp, setGoUp] = useState(false);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleBookAppointmentClick = () => {
-    navigate("/appointment");
-  };
-
-  useEffect(() => {
-    const onPageScroll = () => {
-      if (window.scrollY > 600) {
-        setGoUp(true);
-      } else {
-        setGoUp(false);
-      }
-    };
-    window.addEventListener("scroll", onPageScroll);
-
-    return () => {
-      window.removeEventListener("scroll", onPageScroll);
-    };
-  }, []);
-
   return (
     <div className="section-container">
       <div className="hero-section">
@@ -45,13 +15,6 @@ function Hero() {
             refills and medical notes within minutes. On-demand healthcare
             services at your fingertips.
           </p>
-          <button
-            className="text-appointment-btn"
-            type="button"
-            onClick={handleBookAppointmentClick}
-          >
-            <FontAwesomeIcon icon={faCalendarCheck} /> Book Appointment
-          </button>
           <div className="text-stats">
             <div className="text-stats-container">
               <p>145k+</p>
@@ -71,15 +34,12 @@ function Hero() {
         </div>
 
         <div className="hero-image-section">
-          <img className="hero-image1" src={Doctor} alt="Doctor" />
+          <img 
+            className="hero-image1" 
+            src="https://img.freepik.com/free-photo/medium-shot-doctor-with-stethoscope_23-2149191355.jpg?t=st=1714935542~exp=1714939142~hmac=af15fb5d1f7c5d7c89dc428d4b680a83a4f5ec1fce5cd649ce69e7ed4c686fea&w=740" 
+            alt="Doctor with stethoscope" 
+          />
         </div>
-      </div>
-
-      <div
-        onClick={scrollToTop}
-        className={`scroll-up ${goUp ? "show-scroll" : ""}`}
-      >
-        <FontAwesomeIcon icon={faAngleUp} />
       </div>
     </div>
   );

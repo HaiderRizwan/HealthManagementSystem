@@ -166,19 +166,10 @@ const Options = ({ onOptionChange }) => {
               Your Health Solutions Are Here
             </HeroTitle>
             <Subtitle />
-            <Box sx={{ mt: 4 }}>
-              <AnimatedButton 
-                component={Link} 
-                to="/login"
-                onClick={() => onOptionChange && onOptionChange(option)}
-              >
-                Get Started
-              </AnimatedButton>
-            </Box>
           </Box>
         </HeroContent>
         <HeroImage sx={{ 
-          backgroundImage: 'url("https://img.freepik.com/free-photo/portrait-smiling-young-woman-doctor-healthcare-medical-worker-pointing-fingers-left-showing-clini_1258-88108.jpg?t=st=1714897492~exp=1714901092~hmac=5cc2bedb684a968f2d2190ee647ea75e81137ad980a2127c62b8a6e68dd20516&w=740")'
+          backgroundImage: 'url("https://img.freepik.com/free-photo/medium-shot-doctor-with-stethoscope_23-2149191355.jpg?t=st=1714935542~exp=1714939142~hmac=af15fb5d1f7c5d7c89dc428d4b680a83a4f5ec1fce5cd649ce69e7ed4c686fea&w=740")'
         }} />
       </HeroSection>
       

@@ -99,21 +99,6 @@ const ScrollButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-const BookButton = styled(Button)(({ theme }) => ({
-  position: 'absolute',
-  bottom: theme.spacing(2),
-  right: theme.spacing(2),
-  borderRadius: '20px',
-  textTransform: 'none',
-  fontWeight: 600,
-  fontSize: '0.8rem',
-  padding: '4px 12px',
-  backgroundColor: '#03265a',
-  '&:hover': {
-    backgroundColor: '#2752af',
-  },
-}));
-
 const RatingChip = styled(Chip)(({ theme }) => ({
   position: 'absolute',
   top: 8,
@@ -479,12 +464,6 @@ const SpecialtyDoctorsSlideshow = () => {
                             <DoctorDetails variant="body2">
                               {doctor.details}
                             </DoctorDetails>
-                            <BookButton 
-                              variant="contained" 
-                              size="small"
-                            >
-                              Book Now
-                            </BookButton>
                           </Box>
                         </DoctorInfo>
                       </EnhancedCard>
