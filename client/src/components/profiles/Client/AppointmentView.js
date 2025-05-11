@@ -240,7 +240,7 @@ const AppointmentView = ({ userId }) => {
     return (
       <Container maxWidth="md" className={classes.container}>
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
-          <CircularProgress />
+        <CircularProgress />
         </Box>
       </Container>
     );
@@ -251,8 +251,8 @@ const AppointmentView = ({ userId }) => {
       <Container maxWidth="md" className={classes.container}>
         <Paper elevation={2} sx={{ p: 3, bgcolor: '#ffebee', borderRadius: '8px' }}>
           <Typography variant="h6" color="error" display="flex" alignItems="center">
-            <ErrorIcon className={classes.icon} /> Error: {error}
-          </Typography>
+          <ErrorIcon className={classes.icon} /> Error: {error}
+        </Typography>
         </Paper>
       </Container>
     );
@@ -267,42 +267,42 @@ const AppointmentView = ({ userId }) => {
             My Appointments
           </Typography>
           
-          <Grid container spacing={2} className={classes.header}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Search by doctor name or date"
-                variant="outlined"
-                size="small"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton onClick={handleSearch}>
-                      <SearchIcon />
-                    </IconButton>
-                  ),
-                }}
-              />
-            </Grid>
+      <Grid container spacing={2} className={classes.header}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Search by doctor name or date"
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <IconButton onClick={handleSearch}>
+                  <SearchIcon />
+                </IconButton>
+              ),
+            }}
+          />
+        </Grid>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small">
-                <InputLabel id="status-filter-label">Status</InputLabel>
-                <Select
-                  labelId="status-filter-label"
-                  id="status-filter"
-                  value={statusFilter}
-                  onChange={handleStatusFilterChange}
+            <InputLabel id="status-filter-label">Status</InputLabel>
+            <Select
+              labelId="status-filter-label"
+              id="status-filter"
+              value={statusFilter}
+              onChange={handleStatusFilterChange}
                   label="Status"
-                >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="confirmed">Confirmed</MenuItem>
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="confirmed">Confirmed</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
             <Grid item xs={12} sm={2}>
               <Button 
                 fullWidth 
@@ -314,8 +314,8 @@ const AppointmentView = ({ userId }) => {
               >
                 Reset
               </Button>
-            </Grid>
-          </Grid>
+        </Grid>
+      </Grid>
         </CardContent>
       </Card>
 
@@ -362,10 +362,10 @@ const AppointmentView = ({ userId }) => {
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     Dr. {appointment.doctor_id.fullName}
-                  </Typography>
+      </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {appointment.doctor_id.specialization || 'General Physician'}
-                  </Typography>
+        </Typography>
                 </Box>
               </Box>
 
@@ -376,14 +376,14 @@ const AppointmentView = ({ userId }) => {
                   <CalendarIcon color="primary" />
                   <Typography variant="body1">
                     <strong>Date:</strong> {formatDate(appointment.date)}
-                  </Typography>
+        </Typography>
                 </Box>
                 
                 <Box className={classes.appointmentTime}>
                   <AccessTimeIcon color="action" />
                   <Typography variant="body1">
                     <strong>Time:</strong> {formatTime(appointment.timeSlot_id.startTime)} - {formatTime(appointment.timeSlot_id.endTime)}
-                  </Typography>
+        </Typography>
                 </Box>
                 
                 {appointment.location && (
@@ -391,7 +391,7 @@ const AppointmentView = ({ userId }) => {
                     <LocationIcon color="action" />
                     <Typography variant="body1">
                       <strong>Location:</strong> {appointment.location}
-                    </Typography>
+        </Typography>
                   </Box>
                 )}
                 
@@ -400,7 +400,7 @@ const AppointmentView = ({ userId }) => {
                     <NotesIcon color="action" />
                     <Typography variant="body1">
                       <strong>Reason:</strong> {appointment.reason}
-                    </Typography>
+        </Typography>
                   </Box>
                 )}
               </Box>
@@ -423,7 +423,7 @@ const AppointmentView = ({ userId }) => {
                   </Button>
                 )}
               </Box>
-            </Paper>
+    </Paper>
           );
         })
       )}

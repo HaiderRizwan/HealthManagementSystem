@@ -45,16 +45,22 @@ const AddRecord = ({ userId, handleAddSubmitRecord,handleBack }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(buildApiUrl('/api/medical-records'), {
+      console.log('Submitting medical record with data:', {
+        ...newRecord,
+        userId
+      });
+      
+      const response = await axios.post(buildApiUrl('/api/medical-records'), {
         ...newRecord,
         userId
       });
 
-      console.log('New record added successfully', userData);
+      console.log('New record added successfully', response.data);
 
       navigate('/ClientProfile', { state: { user: userData } });
     } catch (error) {
-      console.error('Error adding new record:', error);
+      console.error('Error adding new record:', error.response ? error.response.data : error.message);
+      alert('Failed to add medical record. Please check the console for details.');
     }
   };
 

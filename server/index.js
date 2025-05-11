@@ -6,29 +6,30 @@ const cors = require('cors');
 const OpenAI = require('openai');
 const bodyParser = require("body-parser");
 const jwt = require('jsonwebtoken');
+const corsMiddleware = require('./cors-middleware');
+
+// Load environment variables if .env file exists
+try {
+  require('dotenv').config();
+  console.log('Environment variables loaded from .env file');
+} catch (error) {
+  console.log('No .env file found, using default environment variables');
+}
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, use environment variable
 
+// Initialize OpenAI with API key
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: process.env.OPENAI_API_KEY || process.argv[2] || "sk-your-api-key-here", // Can be passed as command-line parameter
 });
 
 const app = express();
 
-// Enhanced CORS configuration
-const corsOptions = {
-  origin: [
-    'https://health-management-system-client.vercel.app',
-    'http://localhost:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
-};
+// Apply our custom CORS middleware
+app.use(corsMiddleware);
 
-// Enable CORS with options before other middleware
-app.use(cors(corsOptions));
+// Enable express middleware
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -186,33 +187,52 @@ async function generateResponse(prompt, model) {
 
 // endpoint for ChatGPT
 app.post("/chat", async (req, res) => {
-  const { prompt } = req.body;
-  // // Prompt guidance (optional)
-  if (!prompt.startsWith("Tell me about") && !prompt.startsWith("What are the symptoms of")) {
-    console.log("Prompt does not start with 'Tell me about' or 'What are the symptoms of'.")
-    res.send("For medical assistance, consider starting your prompt with 'Tell me about' or 'What are the symptoms of' followed by your health concern.");
-    return;
-  }
-  
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo-1106',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are a health assistant, skilled in providing medical assistance only and do not provide assistance for any request which is not related to health.',
-      },
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-  });
+  try {
+    const { prompt } = req.body;
+    
+    if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+      return res.status(400).json({ error: 'Please provide a valid prompt' });
+    }
+    
+    // Check if OpenAI API key is configured
+    if (!openai.apiKey || openai.apiKey === "sk-your-api-key-here") {
+      console.error("OpenAI API key is not configured");
+      return res.status(500).json({ 
+        error: 'OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable.' 
+      });
+    }
+    
+    console.log("Processing chat request with prompt:", prompt);
+    
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a health assistant, skilled in providing medical assistance only and do not provide assistance for any request which is not related to health.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      max_tokens: 500
+    });
 
-  let responseText = completion.choices[0].message.content;
-  res.send(responseText);
-  // const fineTunedModel = await fineTuneModel();
-  // let responseText = await generateResponse(prompt, fineTunedModel);
-  // res.send(responseText);
+    if (completion.choices && completion.choices[0] && completion.choices[0].message) {
+      let responseText = completion.choices[0].message.content;
+      console.log("Generated response:", responseText);
+      res.json({ response: responseText });
+    } else {
+      throw new Error('Invalid response from OpenAI API');
+    }
+  } catch (error) {
+    console.error('Error in chat endpoint:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate response', 
+      details: error.message 
+    });
+  }
 });
 
 app.get('/json', async (req, res) => {
@@ -533,6 +553,14 @@ app.get('/api/medical-records/:userId', async (req, res) => {
   // Add a new medical record
 app.post('/api/medical-records', async (req, res) => {
     try {
+      console.log('Received medical record data:', req.body);
+      
+      // Validate required fields
+      if (!req.body.userId || !req.body.date || !req.body.doctorName || !req.body.diagnosis || !req.body.prescription) {
+        console.error('Missing required fields:', req.body);
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+      
       const newRecord = new MedicalRecord({
         userId: req.body.userId,
         date: req.body.date,
@@ -541,11 +569,14 @@ app.post('/api/medical-records', async (req, res) => {
         prescription: req.body.prescription
       });
   
+      console.log('Created new record object:', newRecord);
       const savedRecord = await newRecord.save();
+      console.log('Record saved successfully:', savedRecord);
       res.status(201).json(savedRecord);
     } catch (error) {
-      console.error('Error adding new medical record:', error);
-      res.status(500).json({ message: 'Error adding new medical record' });
+      console.error('Error adding new medical record:', error.message);
+      console.error('Error stack:', error.stack);
+      res.status(500).json({ message: 'Error adding new medical record', error: error.message });
     }
   });
   
@@ -1148,8 +1179,8 @@ app.put('/api/users/:userId', async (req, res) => {
   }
 });
 
-// Add a health check endpoint at the beginning of your routes
-app.get('/health', (req, res) => {
+// Health check endpoint
+app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 

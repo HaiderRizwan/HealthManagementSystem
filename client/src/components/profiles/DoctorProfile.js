@@ -145,6 +145,8 @@ const DoctorProfile = () => {
         return <ManageSchedule userId={userData._id} />;
       case 'profile-settings':
         return <ProfileSettings userId={userData._id} userRole="doctor" />;
+      case 'patients':
+        return <AppointmentDoctor userId={userData._id} patientView={true} />;
       default:
         return (
           <Box sx={{ mt: 4, mb: 2 }}>
@@ -174,8 +176,8 @@ const DoctorProfile = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, section: 'profile' },
     { text: 'Appointments', icon: <EventNoteIcon />, section: 'appointments' },
     { text: 'Manage Schedule', icon: <CalendarMonthIcon />, section: 'manage-schedule' },
-    { text: 'Medical Records', icon: <MedicalServicesIcon />, section: 'medical-records' },
-    { text: 'Patients', icon: <LocalHospitalIcon />, section: 'patients' }
+    { text: 'Patients', icon: <PersonIcon />, section: 'patients' },
+    { text: 'Settings', icon: <SettingsIcon />, section: 'profile-settings' }
   ];
 
   return (

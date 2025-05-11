@@ -72,7 +72,7 @@ const StatusChip = ({ status }) => {
   return <Chip icon={icon} label={label} color={color} variant="outlined" />;
 };
 
-const AppointmentDoctor = ({ userId }) => {
+const AppointmentDoctor = ({ userId, patientView }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
@@ -80,6 +80,7 @@ const AppointmentDoctor = ({ userId }) => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [actionType, setActionType] = useState('');
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
     fetchAppointments();
@@ -90,6 +91,26 @@ const AppointmentDoctor = ({ userId }) => {
       const response = await axios.get(buildApiUrl(`/appointments/doctor/${userId}`));
       console.log('Appointments:', response.data);
       setAppointments(response.data);
+      
+      // Process patient data if in patient view mode
+      if (patientView) {
+        // Group appointments by patient
+        const patientMap = {};
+        response.data.forEach(appointment => {
+          if (!patientMap[appointment.patientName]) {
+            patientMap[appointment.patientName] = {
+              name: appointment.patientName,
+              appointments: []
+            };
+          }
+          patientMap[appointment.patientName].appointments.push(appointment);
+        });
+        
+        // Convert map to array
+        const patientList = Object.values(patientMap);
+        setPatients(patientList);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -179,7 +200,97 @@ const AppointmentDoctor = ({ userId }) => {
 
   const filteredAppointments = getFilteredAppointments();
 
-  return (
+  // Add this new function to render the patient view
+  const renderPatientView = () => {
+    return (
+      <Box sx={{ padding: 3 }}>
+        <Typography variant="h4" gutterBottom sx={{ 
+          fontWeight: 'bold',
+          color: '#1976d2',
+          borderBottom: '2px solid #1976d2',
+          paddingBottom: 1,
+          marginBottom: 3
+        }}>
+          Patients
+        </Typography>
+
+        <TextField
+          fullWidth
+          placeholder="Search patients..."
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          sx={{ mb: 3 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : patients.length === 0 ? (
+          <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+            No patients found
+          </Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {patients
+              .filter(patient => 
+                patient.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+              .map((patient, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Card sx={{ mb: 2, boxShadow: 3 }}>
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <PersonIcon fontSize="large" sx={{ mr: 2, color: '#1976d2' }} />
+                        <Typography variant="h6">{patient.name}</Typography>
+                      </Box>
+                      <Divider sx={{ mb: 2 }} />
+                      <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+                        Appointment History:
+                      </Typography>
+                      {patient.appointments.map((appointment, appIndex) => (
+                        <Box key={appIndex} sx={{ mb: 1, p: 1, bgcolor: '#f5f5f5', borderRadius: 1 }}>
+                          <Grid container spacing={1} alignItems="center">
+                            <Grid item xs={12} sm={4}>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
+                                <Typography variant="body2">{formatDate(appointment.date)}</Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <AccessTimeIcon fontSize="small" sx={{ mr: 1 }} />
+                                <Typography variant="body2">
+                                  {appointment.timeSlotStart} - {appointment.timeSlotEnd}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <StatusChip status={appointment.status} />
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+          </Grid>
+        )}
+      </Box>
+    );
+  };
+
+  // Modify the return statement to conditionally render the patient view
+  return patientView ? renderPatientView() : (
     <Box sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom sx={{ 
         fontWeight: 'bold',
@@ -247,183 +358,156 @@ const AppointmentDoctor = ({ userId }) => {
         </Grid>
       </Grid>
 
+      {/* Search and filter */}
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
+        <TextField
+          placeholder="Search appointments..."
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          sx={{ flexGrow: 1, mr: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+
+      {/* Tabs for filtering by status */}
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ 
+          mb: 3, 
+          borderBottom: '1px solid #e0e0e0',
+          '& .MuiTab-root': { fontWeight: 600 }
+        }}
+      >
+        <Tab 
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <StyledBadge badgeContent={pendingCount} color="warning" sx={{ mr: 1 }}>
+                <NotificationsActiveIcon />
+              </StyledBadge>
+              Pending
+            </Box>
+          } 
+        />
+        <Tab 
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <StyledBadge badgeContent={confirmedCount} color="primary" sx={{ mr: 1 }}>
+                <EventAvailableIcon />
+              </StyledBadge>
+              Confirmed
+            </Box>
+          } 
+        />
+        <Tab 
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <StyledBadge badgeContent={completedCount} color="success" sx={{ mr: 1 }}>
+                <DoneAllIcon />
+              </StyledBadge>
+              Completed
+            </Box>
+          } 
+        />
+        <Tab 
+          label={
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <StyledBadge badgeContent={cancelledCount} color="error" sx={{ mr: 1 }}>
+                <EventBusyIcon />
+              </StyledBadge>
+              Cancelled
+            </Box>
+          } 
+        />
+      </Tabs>
+
+      {/* Appointment Table */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
+          <CircularProgress />
         </Box>
+      ) : filteredAppointments.length === 0 ? (
+        <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+          No appointments found
+        </Typography>
       ) : (
-        <>
-          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={handleTabChange}
-              indicatorColor="primary"
-              textColor="primary"
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              <Tab 
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <NotificationsActiveIcon sx={{ mr: 1 }} />
-                    Pending ({pendingCount})
-                  </Box>
-                } 
-              />
-              <Tab 
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <EventAvailableIcon sx={{ mr: 1 }} />
-                    Confirmed ({confirmedCount})
-                  </Box>
-                } 
-              />
-              <Tab 
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <DoneAllIcon sx={{ mr: 1 }} />
-                    Completed ({completedCount})
-                  </Box>
-                } 
-              />
-              <Tab 
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <EventBusyIcon sx={{ mr: 1 }} />
-                    Cancelled ({cancelledCount})
-                  </Box>
-                } 
-              />
-            </Tabs>
-            
-            <TextField
-              placeholder="Search appointments..."
-              variant="outlined"
-              size="small"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: '250px' }}
-            />
-          </Box>
-
-          <Paper elevation={3} sx={{ overflow: 'hidden', borderRadius: 2 }}>
-            {filteredAppointments.length === 0 ? (
-              <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Typography variant="h6" color="text.secondary">
-                  No {getStatusLabel(tabValue === 0 ? 'Pending' : tabValue === 1 ? 'Confirmed' : tabValue === 2 ? 'Completed' : 'Cancelled')} appointments found
-                </Typography>
-              </Box>
-            ) : (
-              <TableContainer>
-            <Table>
-                  <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-                <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Patient</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
+        <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
+          <Table>
+            <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Patient Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredAppointments.map((appointment) => (
+                <TableRow key={appointment._id} sx={{ '&:hover': { bgcolor: '#f9f9f9' } }}>
+                  <TableCell>{appointment.patientName}</TableCell>
+                  <TableCell>{formatDate(appointment.date)}</TableCell>
+                  <TableCell>{`${appointment.timeSlotStart} - ${appointment.timeSlotEnd}`}</TableCell>
+                  <TableCell>
+                    <StatusChip status={appointment.status} />
+                  </TableCell>
+                  <TableCell>
+                    {appointment.status === 'Pending' && (
+                      <>
+                        <Tooltip title="Confirm Appointment">
+                          <IconButton 
+                            color="primary" 
+                            onClick={() => openConfirmationDialog(appointment, 'confirm')}
+                          >
+                            <CheckCircleIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Cancel Appointment">
+                          <IconButton 
+                            color="error"
+                            onClick={() => openConfirmationDialog(appointment, 'cancel')}
+                          >
+                            <CancelIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                    {appointment.status === 'Confirmed' && (
+                      <Tooltip title="Mark as Completed">
+                        <IconButton 
+                          color="success"
+                          onClick={() => openConfirmationDialog(appointment, 'complete')}
+                        >
+                          <DoneAllIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                    {filteredAppointments.map((appointment) => (
-                      <TableRow 
-                        key={appointment._id}
-                        sx={{ 
-                          '&:hover': { bgcolor: '#f9f9f9' },
-                          borderLeft: appointment.status === 'Pending' ? '4px solid orange' : 
-                                     appointment.status === 'Confirmed' ? '4px solid #1976d2' :
-                                     appointment.status === 'Completed' ? '4px solid green' :
-                                     '4px solid red'
-                        }}
-                      >
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <CalendarTodayIcon sx={{ mr: 1, color: '#666' }} fontSize="small" />
-                            {formatDate(appointment.date)}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <AccessTimeIcon sx={{ mr: 1, color: '#666' }} fontSize="small" />
-                            {`${appointment.timeSlotStart} - ${appointment.timeSlotEnd}`}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <PersonIcon sx={{ mr: 1, color: '#666' }} fontSize="small" />
-                            {appointment.patientName}
-                          </Box>
-                        </TableCell>
-                      <TableCell>
-                          <StatusChip status={appointment.status} />
-                      </TableCell>
-                      <TableCell>
-                          {appointment.status === 'Pending' && (
-                            <>
-                              <Tooltip title="Confirm Appointment">
-                                <Button 
-                                  onClick={() => openConfirmationDialog(appointment, 'confirm')} 
-                                  variant="contained" 
-                                  color="primary" 
-                                  size="small" 
-                                  startIcon={<CheckCircleIcon />}
-                                  sx={{ mr: 1, borderRadius: 2 }}
-                                >
-                                  Confirm
-                                </Button>
-                              </Tooltip>
-                              <Tooltip title="Cancel Appointment">
-                                <Button 
-                                  onClick={() => openConfirmationDialog(appointment, 'cancel')} 
-                                  variant="outlined" 
-                                  color="error" 
-                                  size="small" 
-                                  startIcon={<CancelIcon />}
-                                  sx={{ borderRadius: 2 }}
-                                >
-                                  Cancel
-                                </Button>
-                              </Tooltip>
-                            </>
-                          )}
-                          {appointment.status === 'Confirmed' && (
-                            <Tooltip title="Mark as Completed">
-                              <Button 
-                                onClick={() => openConfirmationDialog(appointment, 'complete')} 
-                                variant="contained" 
-                                color="success" 
-                                size="small" 
-                                startIcon={<DoneAllIcon />}
-                                sx={{ borderRadius: 2 }}
-                              >
-                                Complete
-                              </Button>
-                            </Tooltip>
-                          )}
-                      </TableCell>
-                    </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-            )}
-          </Paper>
-        </>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
       {/* Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+      >
         <DialogTitle>
           {actionType === 'confirm' ? 'Confirm Appointment' : 
-           actionType === 'cancel' ? 'Cancel Appointment' : 'Complete Appointment'}
+           actionType === 'cancel' ? 'Cancel Appointment' : 
+           'Mark Appointment as Completed'}
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -431,33 +515,22 @@ const AppointmentDoctor = ({ userId }) => {
              actionType === 'cancel' ? 'Are you sure you want to cancel this appointment?' : 
              'Are you sure you want to mark this appointment as completed?'}
           </DialogContentText>
-          {selectedAppointment && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>Patient:</strong> {selectedAppointment.patientName}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Date:</strong> {formatDate(selectedAppointment.date)}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Time:</strong> {`${selectedAppointment.timeSlotStart} - ${selectedAppointment.timeSlotEnd}`}
-              </Typography>
-            </Box>
-          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="inherit">Cancel</Button>
+          <Button onClick={handleCloseDialog} color="primary">
+            No
+          </Button>
           <Button 
-            onClick={() => handleBookAppointment(
-              selectedAppointment._id, 
-              actionType === 'confirm' ? 'Confirmed' : 
-              actionType === 'cancel' ? 'Cancelled' : 'Completed'
-            )} 
-            color={actionType === 'confirm' ? 'primary' : actionType === 'cancel' ? 'error' : 'success'}
-            variant="contained"
+            onClick={() => {
+              const status = 
+                actionType === 'confirm' ? 'Confirmed' : 
+                actionType === 'cancel' ? 'Cancelled' : 'Completed';
+              handleBookAppointment(selectedAppointment._id, status);
+            }} 
+            color="primary" 
             autoFocus
           >
-            {actionType === 'confirm' ? 'Confirm' : actionType === 'cancel' ? 'Cancel Appointment' : 'Mark as Completed'}
+            Yes
           </Button>
         </DialogActions>
       </Dialog>

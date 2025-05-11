@@ -13,12 +13,36 @@ export default function AiChatbot() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setResponse(""); // Clear previous response
 
     try {
+      if (!prompt.trim()) {
+        setResponse("Please enter a question.");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Sending prompt to server:", prompt);
       const res = await axios.post(buildApiUrl('/chat'), { prompt });
-      setResponse(res.data);
+      
+      console.log("Received response:", res.data);
+      
+      if (res.data && res.data.response) {
+        setResponse(res.data.response);
+      } else if (res.data && typeof res.data === 'string') {
+        // Handle old response format for backward compatibility
+        setResponse(res.data);
+      } else if (res.data && res.data.error) {
+        setResponse(`Error: ${res.data.error}`);
+      } else {
+        setResponse("Received an unexpected response format from the server.");
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error in chat request:", error);
+      setResponse(
+        error.response?.data?.error || 
+        "Sorry, there was an error processing your request. Please try again later."
+      );
     }
 
     setLoading(false);

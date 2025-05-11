@@ -166,6 +166,15 @@ const Options = ({ onOptionChange }) => {
               Your Health Solutions Are Here
             </HeroTitle>
             <Subtitle />
+            <Box sx={{ mt: 4 }}>
+              <AnimatedButton 
+                component={Link} 
+                to="/login"
+                onClick={() => onOptionChange && onOptionChange(option)}
+              >
+                Get Started
+              </AnimatedButton>
+            </Box>
           </Box>
         </HeroContent>
         <HeroImage sx={{ 

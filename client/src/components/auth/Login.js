@@ -10,7 +10,9 @@ import Box from '@mui/material/Box';
 import { makeStyles } from '@mui/styles';
 import Typography from '@mui/material/Typography';
 import { setAuthToken } from '../../utils/auth';
-import { buildApiUrl } from '../../config/api';
+import { buildApiUrl, toggleApiEnvironment, getApiEnvironmentName } from '../../config/api';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 const useStyles = makeStyles({
     root: {
@@ -82,6 +84,15 @@ const useStyles = makeStyles({
       borderRadius: '8px',
       marginBottom: '20px',
       fontWeight: '500',
+    },
+    apiToggle: {
+      marginTop: '20px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '8px',
+      borderRadius: '8px',
+      backgroundColor: 'rgba(0, 0, 0, 0.05)',
     }
   });
   
@@ -93,8 +104,17 @@ const Login = ({ selectedOption }) => {
         password: ''
     });
     const [error, setError] = useState('');
+    const [apiEnv, setApiEnv] = useState(getApiEnvironmentName());
+    const [useLocalApi, setUseLocalApi] = useState(localStorage.getItem('useLocalApi') === 'true');
 
     const navigate = useNavigate();
+
+    const handleApiToggle = () => {
+        const isLocal = toggleApiEnvironment();
+        setApiEnv(getApiEnvironmentName());
+        setUseLocalApi(isLocal);
+        // No need to reload the page on the login screen
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -102,17 +122,9 @@ const Login = ({ selectedOption }) => {
         
         try {
             console.log('Attempting login with:', formData);
+            console.log('API URL:', buildApiUrl('/api/login'));
             
-            // Add timeout to prevent hanging requests
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
-            
-            const response = await axios.post(buildApiUrl('/api/login'), formData, {
-                signal: controller.signal,
-                timeout: 10000
-            });
-            
-            clearTimeout(timeoutId);
+            const response = await axios.post(buildApiUrl('/api/login'), formData);
             
             console.log('Login response received:', response.data);
             
@@ -244,6 +256,24 @@ const Login = ({ selectedOption }) => {
                         >
                             Sign Up
                         </Button>
+                        
+                        {/* API Environment Toggle */}
+                        <Box className={classes.apiToggle}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={useLocalApi}
+                                        onChange={handleApiToggle}
+                                        color="primary"
+                                    />
+                                }
+                                label={
+                                    <Typography variant="body2">
+                                        API: <strong>{apiEnv}</strong>
+                                    </Typography>
+                                }
+                            />
+                        </Box>
                     </form>
                 </CardContent>
             </Card>
