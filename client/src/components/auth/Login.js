@@ -181,7 +181,14 @@ const Login = ({ selectedOption }) => {
             if (errorInfo.isTimeout) {
                 setError('Request timed out. Please check your internet connection or try again later.');
             } else if (error.response) {
-                setError(error.response.data?.message || 'Login failed. Please check your credentials.');
+                // Handle doctor approval pending message
+                if (error.response.status === 403 && error.response.data?.approvalStatus === 'Pending') {
+                    setError('Your doctor account is pending approval. You will be notified when an admin approves your account.');
+                } else if (error.response.status === 403 && error.response.data?.approvalStatus === 'Rejected') {
+                    setError('Your doctor account registration has been rejected. Please contact the administrator for more information.');
+                } else {
+                    setError(error.response.data?.message || 'Login failed. Please check your credentials.');
+                }
             } else if (error.request) {
                 setError('No response from server. Please check your internet connection.');
             } else {

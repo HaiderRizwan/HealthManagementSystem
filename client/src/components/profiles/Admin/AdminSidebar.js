@@ -39,6 +39,7 @@ const AdminSidebar = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/AdminProfile' },
     { text: 'Doctors', icon: <DoctorIcon />, path: '/doctors' },
+    { text: 'Doctor Approvals', icon: <DoctorIcon color="warning" />, path: '/doctor-approvals' },
     { text: 'Patients', icon: <PatientIcon />, path: '/patients' },
     { text: 'Appointments', icon: <AppointmentIcon />, path: '/appointments' },
     { text: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },

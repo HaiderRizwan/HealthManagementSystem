@@ -202,7 +202,7 @@ const AppointmentDoctor = ({ userId, patientView }) => {
 
   // Add this new function to render the patient view
   const renderPatientView = () => {
-    return (
+  return (
       <Box sx={{ padding: 3 }}>
         <Typography variant="h4" gutterBottom sx={{ 
           fontWeight: 'bold',
@@ -433,7 +433,7 @@ const AppointmentDoctor = ({ userId, patientView }) => {
       {/* Appointment Table */}
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
+        <CircularProgress />
         </Box>
       ) : filteredAppointments.length === 0 ? (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
@@ -441,26 +441,26 @@ const AppointmentDoctor = ({ userId, patientView }) => {
         </Typography>
       ) : (
         <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
-          <Table>
+            <Table>
             <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-              <TableRow>
+                <TableRow>
                 <TableCell sx={{ fontWeight: 'bold' }}>Patient Name</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Time</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                 <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+                </TableRow>
+              </TableHead>
+              <TableBody>
               {filteredAppointments.map((appointment) => (
                 <TableRow key={appointment._id} sx={{ '&:hover': { bgcolor: '#f9f9f9' } }}>
                   <TableCell>{appointment.patientName}</TableCell>
-                  <TableCell>{formatDate(appointment.date)}</TableCell>
-                  <TableCell>{`${appointment.timeSlotStart} - ${appointment.timeSlotEnd}`}</TableCell>
-                  <TableCell>
+                      <TableCell>{formatDate(appointment.date)}</TableCell>
+                      <TableCell>{`${appointment.timeSlotStart} - ${appointment.timeSlotEnd}`}</TableCell>
+                      <TableCell>
                     <StatusChip status={appointment.status} />
-                  </TableCell>
-                  <TableCell>
+                      </TableCell>
+                      <TableCell>
                     {appointment.status === 'Pending' && (
                       <>
                         <Tooltip title="Confirm Appointment">
@@ -491,12 +491,12 @@ const AppointmentDoctor = ({ userId, patientView }) => {
                         </IconButton>
                       </Tooltip>
                     )}
-                  </TableCell>
+                      </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
       )}
 
       {/* Confirmation Dialog */}

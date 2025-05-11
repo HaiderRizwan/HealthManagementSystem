@@ -302,11 +302,20 @@ app.post('/api/login', async (req, res) => {
         if (user.role === 'Doctor') {
             const doctorData = await Doctor.findOne({ user: user._id });
             if (doctorData) {
+                // Check if the doctor is approved
+                if (doctorData.approvalStatus !== 'Approved') {
+                    return res.status(403).json({ 
+                        message: `Your account is currently ${doctorData.approvalStatus.toLowerCase()}. Please wait for admin approval before logging in.`,
+                        approvalStatus: doctorData.approvalStatus
+                    });
+                }
+                
                 additionalData = {
                     medicalLicenseNumber: doctorData.medicalLicenseNumber,
                     specializationName: doctorData.specializationName,
                     clinicOrHospital: doctorData.clinicOrHospital,
-                    doctorId: doctorData._id
+                    doctorId: doctorData._id,
+                    approvalStatus: doctorData.approvalStatus
                 };
             }
         }
@@ -428,7 +437,8 @@ app.post('/api/signup/client', async (req, res) => {
 //client Appointment handling
 app.get('/api/doctors_list', async (req, res) => {
   try {
-    const doctors = await Doctor.find().populate('user');
+    // Only return doctors with approved status
+    const doctors = await Doctor.find({ approvalStatus: 'Approved' }).populate('user');
     res.json(doctors);
   } catch (error) {
     console.error('Error fetching doctors:', error);
@@ -508,6 +518,7 @@ app.post('/api/signup/doctor', async (req, res) => {
           medicalLicenseNumber: req.body.licenseNumber,
           specializationName: req.body.specializationName,
           clinicOrHospital: req.body.affiliation,
+          approvalStatus: 'Pending', // Set initial approval status to Pending
           user: savedUser._id,
       });
 
@@ -1182,6 +1193,76 @@ app.put('/api/users/:userId', async (req, res) => {
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
+// GET endpoint to get all doctors with their approval status
+app.get('/api/admin/pending-doctors', async (req, res) => {
+  try {
+    // Find all doctors and populate with user details
+    const doctors = await Doctor.find()
+      .populate('user', 'fullName email contactNumber')
+      .lean();
+    
+    // Format the response
+    const formattedDoctors = doctors.map(doctor => {
+      return {
+        _id: doctor._id,
+        doctorId: doctor.user._id,
+        fullName: doctor.user.fullName,
+        email: doctor.user.email,
+        contactNumber: doctor.user.contactNumber,
+        medicalLicenseNumber: doctor.medicalLicenseNumber,
+        specializationName: doctor.specializationName,
+        clinicOrHospital: doctor.clinicOrHospital,
+        approvalStatus: doctor.approvalStatus || 'Pending'
+      };
+    });
+
+    res.status(200).json(formattedDoctors);
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    res.status(500).json({ message: 'Error fetching doctors' });
+  }
+});
+
+// PUT endpoint to update doctor approval status
+app.put('/api/admin/doctor-approval/:doctorId', async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const { approvalStatus } = req.body;
+
+    // Validate the approval status
+    if (!['Approved', 'Rejected', 'Pending'].includes(approvalStatus)) {
+      return res.status(400).json({ message: 'Invalid approval status' });
+    }
+
+    // Find and update the doctor's approval status
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      doctorId,
+      { approvalStatus },
+      { new: true }
+    ).populate('user', 'fullName email');
+
+    if (!updatedDoctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+
+    // Send notification or email to doctor about their approval status
+    // This would be implemented with your notification system
+
+    res.status(200).json({
+      message: `Doctor ${updatedDoctor.user.fullName} has been ${approvalStatus.toLowerCase()}`,
+      doctor: {
+        _id: updatedDoctor._id,
+        fullName: updatedDoctor.user.fullName,
+        email: updatedDoctor.user.email,
+        approvalStatus: updatedDoctor.approvalStatus
+      }
+    });
+  } catch (error) {
+    console.error('Error updating doctor approval status:', error);
+    res.status(500).json({ message: 'Error updating doctor approval status' });
+  }
 });
 
 app.listen(PORT, () => {

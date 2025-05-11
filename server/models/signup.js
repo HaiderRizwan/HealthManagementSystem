@@ -48,6 +48,11 @@ const doctorSchema = new mongoose.Schema({
     clinicOrHospital: {
         type: String
     },
+    approvalStatus: {
+        type: String,
+        enum: ['Pending', 'Approved', 'Rejected'],
+        default: 'Pending'
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

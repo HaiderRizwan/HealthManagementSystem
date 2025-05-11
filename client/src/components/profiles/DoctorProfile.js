@@ -15,7 +15,7 @@ import {
   IconButton, 
   Grid,
   Paper,
-  List,
+  List, 
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -224,7 +224,7 @@ const DoctorProfile = () => {
             <Grid item xs={12} md={3} lg={2}>
               <Paper 
                 elevation={2} 
-                sx={{ 
+        sx={{
                   p: 2, 
                   height: "100%", 
                   borderRadius: 2,
@@ -294,15 +294,15 @@ const DoctorProfile = () => {
                     </ListItemIcon>
                     <ListItemText primary="Logout" />
                   </ListItemButton>
-                </List>
+        </List>
               </Paper>
             </Grid>
-            
+
             {/* Main Content */}
             <Grid item xs={12} md={9} lg={10}>
               <Box sx={{ p: 3 }}>
-                {renderContent()}
-              </Box>
+          {renderContent()}
+        </Box>
             </Grid>
           </Grid>
         </Container>

@@ -37,6 +37,7 @@ import ViewPatients from './components/profiles/Admin/AdminViewPatients.js';
 import Analytics from './components/profiles/Admin/Analytics.js';
 import Billing from './components/profiles/Admin/Billing.js';
 import AdminAppointments from './components/profiles/Admin/AdminAppointments.js';
+import DoctorApprovals from './components/profiles/Admin/DoctorApprovals.js';
 
 function Root() {
   const [selectedOption, setSelectedOption] = useState('');
@@ -139,6 +140,11 @@ function Root() {
           <Route path="/doctors" element={
             <ProtectedRoute requiredRole="admin">
               <ViewDoctor />
+            </ProtectedRoute>
+          } />
+          <Route path="/doctor-approvals" element={
+            <ProtectedRoute requiredRole="admin">
+              <DoctorApprovals />
             </ProtectedRoute>
           } />
           <Route path="/appointments/:doctorId" element={

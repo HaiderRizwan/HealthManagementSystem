@@ -144,13 +144,13 @@ const DoctorSignup = () => {
       });
   
       // Show success message
-      setSuccessMessage('Registration successful! Redirecting to login...');
+      setSuccessMessage('Registration successful! Your account is pending admin approval. You will be notified when your account is approved.');
       setOpenSnackbar(true);
       
       // Redirect after showing the message
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 5000); // Increase timeout to give more time to read the message
     } catch (error) {
       console.error('Signup error:', error.response ? error.response.data : error.message);
       setErrorMessage(error.response?.data?.message || 'Signup failed. Please try again.');
