@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { User, Admin, Patient, Doctor, MedicalRecord, Appointment, TimeSlot, DailySchedule, BloodType, BasicInfo, TestResult } = require('./models/signup.js');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-const OpenAI = require('openai');
+const axios = require('axios'); // Add axios for HTTP requests
 const bodyParser = require("body-parser");
 const jwt = require('jsonwebtoken');
 const corsMiddleware = require('./cors-middleware');
@@ -18,11 +18,7 @@ try {
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, use environment variable
-
-// Initialize OpenAI with API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || process.argv[2] || "sk-your-api-key-here", // Can be passed as command-line parameter
-});
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "your-gemini-api-key"; // Use environment variable for Gemini API key
 
 const app = express();
 
@@ -185,46 +181,112 @@ async function generateResponse(prompt, model) {
   }
 }
 
-// endpoint for ChatGPT
+// Chat endpoint using Gemini API
 app.post("/chat", async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const { prompt, userId } = req.body;
     
     if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
       return res.status(400).json({ error: 'Please provide a valid prompt' });
     }
     
-    // Check if OpenAI API key is configured
-    if (!openai.apiKey || openai.apiKey === "sk-your-api-key-here") {
-      console.error("OpenAI API key is not configured");
+    // Check if Gemini API key is configured
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "your-gemini-api-key") {
+      console.error("Gemini API key is not configured");
       return res.status(500).json({ 
-        error: 'OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable.' 
+        error: 'Gemini API key is not configured. Please set the GEMINI_API_KEY environment variable.' 
       });
     }
     
-    console.log("Processing chat request with prompt:", prompt);
+    // Get patient context if userId is provided
+    let patientContext = '';
+    if (userId) {
+      try {
+        const user = await User.findById(userId);
+        if (user && user.role === 'Patient') {
+          const patient = await Patient.findOne({ user: userId });
+          if (patient) {
+            patientContext = `
+Patient Information:
+Name: ${user.fullName}
+Email: ${user.email}
+Gender: ${patient.gender || 'Not specified'}
+Date of Birth: ${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'Not specified'}
+Medical History: ${patient.medicalHistory || 'None provided'}
+Contact Number: ${user.contactNumber || 'Not specified'}
+`;
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        // Continue without patient context if there's an error
+      }
+    }
     
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a health assistant, skilled in providing medical assistance only and do not provide assistance for any request which is not related to health.',
+    console.log("Processing chat request with prompt:", prompt);
+    if (patientContext) {
+      console.log("Including patient context in request");
+    }
+    
+    // Prepare system prompt with medical focus and patient context
+    const systemPrompt = `You are a health assistant, skilled in providing medical assistance.
+You only provide assistance for health-related queries and do not respond to non-medical requests.
+Please be professional, accurate, and compassionate in your responses.
+If the question is outside your scope or requires immediate medical attention, advise the user to consult a healthcare professional.
+${patientContext ? `\nThe following patient information is available for context:\n${patientContext}` : ''}`;
+    
+    // Make request to Gemini API
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            parts: [
+              { text: systemPrompt },
+              { text: prompt }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.4,
+          topK: 32,
+          topP: 0.95,
+          maxOutputTokens: 800,
         },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      max_tokens: 500
-    });
-
-    if (completion.choices && completion.choices[0] && completion.choices[0].message) {
-      let responseText = completion.choices[0].message.content;
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
+      }
+    );
+    
+    // Extract the response text
+    if (response.data && 
+        response.data.candidates && 
+        response.data.candidates[0] && 
+        response.data.candidates[0].content && 
+        response.data.candidates[0].content.parts && 
+        response.data.candidates[0].content.parts[0]) {
+      
+      let responseText = response.data.candidates[0].content.parts[0].text;
       console.log("Generated response:", responseText);
       res.json({ response: responseText });
     } else {
-      throw new Error('Invalid response from OpenAI API');
+      throw new Error('Invalid response from Gemini API');
     }
   } catch (error) {
     console.error('Error in chat endpoint:', error);
