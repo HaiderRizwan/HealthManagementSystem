@@ -103,11 +103,17 @@ const Login = ({ selectedOption }) => {
         email: '',
         password: ''
     });
+    const [formErrors, setFormErrors] = useState({});
     const [error, setError] = useState('');
     const [apiEnv, setApiEnv] = useState(getApiEnvironmentName());
     const [useLocalApi, setUseLocalApi] = useState(localStorage.getItem('useLocalApi') === 'true');
 
     const navigate = useNavigate();
+
+    const validateEmail = (email) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    };
 
     const handleApiToggle = () => {
         const isLocal = toggleApiEnvironment();
@@ -116,9 +122,44 @@ const Login = ({ selectedOption }) => {
         // No need to reload the page on the login screen
     };
 
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        
+        // Clear validation errors when user types
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: null
+            }));
+        }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        
+        if (!formData.email.trim()) {
+            errors.email = "Email is required";
+        } else if (!validateEmail(formData.email)) {
+            errors.email = "Please enter a valid email";
+        }
+        
+        if (!formData.password) {
+            errors.password = "Password is required";
+        }
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+        
+        // Validate form
+        if (!validateForm()) {
+            return;
+        }
         
         try {
             console.log('Attempting login with:', formData);
@@ -186,6 +227,8 @@ const Login = ({ selectedOption }) => {
                     setError('Your doctor account is pending approval. You will be notified when an admin approves your account.');
                 } else if (error.response.status === 403 && error.response.data?.approvalStatus === 'Rejected') {
                     setError('Your doctor account registration has been rejected. Please contact the administrator for more information.');
+                } else if (error.response.status === 401) {
+                    setError('Invalid email or password. Please try again.');
                 } else {
                     setError(error.response.data?.message || 'Login failed. Please check your credentials.');
                 }
@@ -220,68 +263,72 @@ const Login = ({ selectedOption }) => {
                         <div>
                             <TextField
                                 id="email"
+                                name="email"
                                 label="Email"
                                 type="email"
                                 value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                onChange={handleChange}
                                 required
                                 fullWidth
                                 margin="normal"
                                 autoComplete="email"
                                 className={classes.input}
                                 variant="outlined"
+                                error={!!formErrors.email}
+                                helperText={formErrors.email}
                             />
                         </div>
                         <div>
                             <TextField
                                 id="password"
+                                name="password"
                                 label="Password"
                                 type="password"
                                 value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                onChange={handleChange}
                                 required
                                 fullWidth
                                 margin="normal"
                                 autoComplete="current-password"
                                 className={classes.input}
                                 variant="outlined"
+                                error={!!formErrors.password}
+                                helperText={formErrors.password}
                             />
                         </div>
                         <Button 
-                            type="submit" 
+                            type="submit"
                             variant="contained" 
+                            color="primary" 
                             fullWidth
                             className={classes.loginButton}
                         >
                             Login
                         </Button>
-                        <Button 
-                            variant="outlined" 
-                            onClick={handleSignup} 
-                            fullWidth
-                            className={classes.signupButton}
-                        >
-                            Sign Up
-                        </Button>
-                        
-                        {/* API Environment Toggle */}
-                        <Box className={classes.apiToggle}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={useLocalApi}
-                                        onChange={handleApiToggle}
-                                        color="primary"
-                                    />
-                                }
-                                label={
-                                    <Typography variant="body2">
-                                        API: <strong>{apiEnv}</strong>
-                                    </Typography>
-                                }
-                            />
-                        </Box>
                     </form>
+                    
+                    <Button 
+                        variant="outlined" 
+                        color="primary" 
+                        fullWidth 
+                        className={classes.signupButton}
+                        onClick={handleSignup}
+                    >
+                        Create an account
+                    </Button>
+                    
+                    <Box className={classes.apiToggle}>
+                        <FormControlLabel
+                            control={
+                                <Switch 
+                                    checked={useLocalApi}
+                                    onChange={handleApiToggle}
+                                    color="primary"
+                                />
+                            }
+                            label={`API: ${apiEnv}`}
+                        />
+                    </Box>
                 </CardContent>
             </Card>
         </div>

@@ -87,6 +87,7 @@ const DoctorSignup = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -100,12 +101,37 @@ const DoctorSignup = () => {
     termsAndConditions: false,
   });
 
+  const validateEmail = (email) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePassword = (password) => {
+    // At least 8 characters, one uppercase, one lowercase, one number, one special character
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return re.test(password);
+  };
+
+  const validateContactNumber = (number) => {
+    // Basic phone number validation
+    const re = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
+    return re.test(number);
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === 'checkbox' ? checked : value,
     }));
+
+    // Clear validation errors when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: null
+      }));
+    }
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -115,18 +141,48 @@ const DoctorSignup = () => {
     setOpenSnackbar(false);
   };
 
+  const validateForm = () => {
+    const errors = {};
+    
+    // Validate required fields
+    if (!formData.fullName.trim()) errors.fullName = "Full name is required";
+    if (!formData.email.trim()) errors.email = "Email is required";
+    else if (!validateEmail(formData.email)) errors.email = "Please enter a valid email";
+    
+    if (!formData.password) errors.password = "Password is required";
+    else if (!validatePassword(formData.password)) {
+      errors.password = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+    }
+    
+    if (!formData.confirmPassword) errors.confirmPassword = "Please confirm your password";
+    else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+    
+    if (!formData.licenseNumber.trim()) errors.licenseNumber = "License number is required";
+    if (!formData.specializationName.trim()) errors.specializationName = "Specialization is required";
+    
+    if (!formData.contactNumber.trim()) errors.contactNumber = "Contact number is required";
+    else if (!validateContactNumber(formData.contactNumber)) {
+      errors.contactNumber = "Please enter a valid contact number";
+    }
+    
+    if (!formData.termsAndConditions) errors.termsAndConditions = "You must agree to the terms and conditions";
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Doctor Signup Data:', formData);
   
-    // Input validation conditions
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage('Passwords do not match!');
+    // Validate form
+    if (!validateForm()) {
+      setErrorMessage('Please correct the errors in the form.');
       setOpenSnackbar(true);
       return;
     }
-  
-    // Add more validation conditions as needed...
   
     try {
       const response = await axios.post(buildApiUrl('/api/signup/doctor'), formData);
@@ -151,10 +207,22 @@ const DoctorSignup = () => {
       // Redirect after showing the message
       setTimeout(() => {
         navigate('/login');
-      }, 5000); // Increase timeout to give more time to read the message
+      }, 5000);
     } catch (error) {
       console.error('Signup error:', error.response ? error.response.data : error.message);
-      setErrorMessage(error.response?.data?.message || 'Signup failed. Please try again.');
+      
+      // Handle specific server errors
+      if (error.response && error.response.data) {
+        if (error.response.data.code === 11000) {
+          // MongoDB duplicate key error
+          setErrorMessage('This email is already registered. Please use a different email.');
+        } else {
+          setErrorMessage(error.response.data.message || 'Signup failed. Please try again.');
+        }
+      } else {
+        setErrorMessage('Network error. Please check your connection and try again.');
+      }
+      
       setOpenSnackbar(true);
     }
   };
@@ -175,6 +243,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.fullName}
+            helperText={formErrors.fullName}
           />
 
           <TextField
@@ -187,6 +257,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.email}
+            helperText={formErrors.email}
           />
 
           <TextField
@@ -199,6 +271,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.password}
+            helperText={formErrors.password}
           />
 
           <TextField
@@ -211,6 +285,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.confirmPassword}
+            helperText={formErrors.confirmPassword}
           />
 
           <TextField
@@ -223,6 +299,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.licenseNumber}
+            helperText={formErrors.licenseNumber}
           />
 
           <TextField
@@ -235,6 +313,8 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.specializationName}
+            helperText={formErrors.specializationName}
           />
 
           <TextField
@@ -258,9 +338,11 @@ const DoctorSignup = () => {
             className={classes.input}
             fullWidth
             variant="outlined"
+            error={!!formErrors.contactNumber}
+            helperText={formErrors.contactNumber}
           />
 
-          <div className={classes.checkboxContainer}>
+          <div className={classes.checkboxContainer} style={{color: formErrors.termsAndConditions ? 'red' : 'inherit'}}>
             <input
               type="checkbox"
               name="termsAndConditions"
@@ -271,6 +353,11 @@ const DoctorSignup = () => {
             />
             <span className={classes.checkboxLabel}>Agree to Terms and Conditions</span>
           </div>
+          {formErrors.termsAndConditions && (
+            <Typography color="error" variant="body2" style={{marginTop: '-10px', marginBottom: '10px'}}>
+              {formErrors.termsAndConditions}
+            </Typography>
+          )}
 
           <Button 
             type="submit" 
