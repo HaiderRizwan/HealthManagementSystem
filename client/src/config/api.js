@@ -11,9 +11,9 @@ axios.defaults.headers.common['Accept'] = 'application/json';
 
 // Check if we should use local API (stored in localStorage)
 const getApiBaseUrl = () => {
-  // If there's no explicit setting in localStorage, default to local API in development
+  // If there's no explicit setting in localStorage, default to production API
   if (localStorage.getItem('useLocalApi') === null) {
-    localStorage.setItem('useLocalApi', 'true');
+    localStorage.setItem('useLocalApi', 'false');
   }
   const useLocalApi = localStorage.getItem('useLocalApi') === 'true';
   return useLocalApi ? LOCAL_API_URL : PRODUCTION_API_URL;

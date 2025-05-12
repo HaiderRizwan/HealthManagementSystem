@@ -9,6 +9,7 @@ import { makeStyles } from '@mui/styles';
 import { Link, useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
+import { buildApiUrl } from '../../config/api';
 
 const useStyles = makeStyles({
   root: {
@@ -128,7 +129,7 @@ const DoctorSignup = () => {
     // Add more validation conditions as needed...
   
     try {
-      const response = await axios.post('http://localhost:5000/api/signup/doctor', formData);
+      const response = await axios.post(buildApiUrl('/api/signup/doctor'), formData);
       console.log('Signup successful:', response.data);
   
       setFormData({
